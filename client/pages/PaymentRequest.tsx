@@ -6,7 +6,7 @@ import { createPaymentRequest } from "@/lib/payment-requests";
 import { AuthenticatedVendorHeader, AuthenticatedVendorSidebar } from "@/pages/TrustedVendor";
 import { vendorDevices, type VendorDevice } from "@shared/vendor-data";
 import type { PaymentRequest } from "@shared/payment-requests";
-import { FORM_SUBMISSION_ERROR, submitFormToAppsScript } from "@/lib/form-submission";
+import { FORM_SUBMISSION_ERROR, submitForm } from "@/lib/form-submission";
 
 const initialForm = {
   fullLegalName: "",
@@ -109,7 +109,7 @@ export default function PaymentRequest() {
     setIsSubmitting(true);
     try {
       const createdRequest = await createPaymentRequest({ deviceId: device.id, ...form });
-      await submitFormToAppsScript("payment-request", {
+      await submitForm("payment-request", {
         ...form,
         userId: session?.user.id,
         email,
