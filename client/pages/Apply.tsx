@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { assignmentCategories } from "@/assignment-data";
-import { submitFormToAppsScript } from "@/lib/form-submission";
+import { submitForm } from "@/lib/form-submission";
 import { useAuth } from "@/lib/auth";
 
 const processSteps = [
@@ -150,7 +150,7 @@ export default function Apply() {
 
     setIsSubmitting(true);
     try {
-      await submitFormToAppsScript("application", {
+      await submitForm("application", {
         userId: session?.user.id,
         firstName: application.firstName,
         lastName: application.lastName,

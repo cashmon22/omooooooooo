@@ -29,7 +29,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
-import { FORM_SUBMISSION_ERROR, submitFormToAppsScript } from "@/lib/form-submission";
+import { FORM_SUBMISSION_ERROR, submitForm } from "@/lib/form-submission";
 import { useAuth } from "@/lib/auth";
 
 const contactOptions = [
@@ -91,7 +91,7 @@ export default function Contact() {
     setSubmissionError("");
     setIsSubmitting(true);
     try {
-      await submitFormToAppsScript("contact", { ...form, userId: session?.user.id });
+      await submitForm("contact", { ...form, userId: session?.user.id });
       setForm(initialForm);
       setSubmitted(true);
     } catch {
