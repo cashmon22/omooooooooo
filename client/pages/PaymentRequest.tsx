@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "re
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Check, ChevronRight, CircleAlert, CreditCard, LoaderCircle, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { createPaymentRequest } from "@/lib/payment-requests";
 import { AuthenticatedVendorHeader, AuthenticatedVendorSidebar } from "@/pages/TrustedVendor";
 import { vendorDevices, type VendorDevice } from "@shared/vendor-data";
 import type { PaymentRequest } from "@shared/payment-requests";
@@ -108,13 +107,37 @@ export default function PaymentRequest() {
     setError("");
     setIsSubmitting(true);
     try {
-      const createdRequest = await createPaymentRequest({ deviceId: device.id, ...form });
+      const requestId = crypto.randomUUID();
+      const referenceId = `AMZ-${requestId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
+      const submittedRequest: PaymentRequest = {
+        id: requestId,
+        userId: session?.user.id ?? "",
+        fullLegalName: form.fullLegalName,
+        email,
+        phone: form.phone,
+        deliveryAddress: form.deliveryAddress,
+        city: form.city,
+        stateProvince: form.stateProvince,
+        postalCode: form.postalCode,
+        country: form.country,
+        deviceId: device.id,
+        deviceName: device.name,
+        deviceModel: device.model,
+        deviceAmount: device.price,
+        currency: device.currency,
+        vendor: "Trusted Vendor",
+        status: "Pending Review",
+        createdAt: new Date().toISOString(),
+      };
+
       await submitForm("payment-request", {
         ...form,
         userId: session?.user.id,
         email,
-        requestId: createdRequest.id,
-        referenceId: `AMZ-${createdRequest.id.replace(/-/g, "").slice(0, 12).toUpperCase()}`,
+        requestId,
+        referenceId,
+        deviceAmount: device.price,
+        deviceAmountFormatted: amount,
         selectedDevice: {
           id: device.id,
           name: device.name,
@@ -129,7 +152,7 @@ export default function PaymentRequest() {
           availability: device.availability,
         },
       });
-      navigate("/trusted-vendor/payment-instructions", { state: { request: createdRequest } });
+      navigate("/trusted-vendor/payment-instructions", { state: { request: submittedRequest } });
     } catch {
       setError(FORM_SUBMISSION_ERROR);
     } finally {
