@@ -18,10 +18,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const clearFailedSession = async () => {
+      try {
+        await supabase.auth.signOut({ scope: "local" });
+      } catch {}
+      if (!isMounted) return;
+      setSession(null);
+      setIsLoading(false);
+    };
+
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        void clearFailedSession();
+        return;
+      }
       if (!isMounted) return;
       setSession(session);
       setIsLoading(false);
+    }).catch(() => {
+      void clearFailedSession();
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
